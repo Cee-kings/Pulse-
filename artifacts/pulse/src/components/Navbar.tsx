@@ -42,6 +42,17 @@ export default function Navbar() {
           </Link>
 
           <Link
+            href="/discover"
+            className={`text-sm transition-colors hidden md:block px-3 py-1.5 rounded-lg ${
+              location === "/discover"
+                ? "text-foreground font-medium"
+                : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+            }`}
+          >
+            Discover
+          </Link>
+
+          <Link
             href="/write"
             className="flex items-center gap-1.5 text-sm font-semibold text-white px-3.5 sm:px-4 py-1.5 rounded-full transition-all"
             style={{ background: "linear-gradient(135deg, #8b5cf6, #22d3ee)" }}
