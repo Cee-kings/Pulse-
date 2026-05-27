@@ -1,14 +1,23 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AuthProvider from "@/components/AuthProvider";
+import LoginScreen from "@/components/LoginScreen";
 import Navbar from "@/components/Navbar";
 import HomeFeed from "@/pages/HomeFeed";
 import WritePage from "@/pages/WritePage";
 import PostPage from "@/pages/PostPage";
 import AuthorProfile from "@/pages/AuthorProfile";
+import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
 
-function Router() {
+function AppContent() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <LoginScreen />;
+  }
+
   return (
     <>
       <Navbar />
@@ -34,7 +43,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Router />
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
       </WouterRouter>
     </QueryClientProvider>
   );
