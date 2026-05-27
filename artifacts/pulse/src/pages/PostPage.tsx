@@ -1,14 +1,12 @@
 import { Link, useParams, useLocation } from "wouter";
-import { Heart, ArrowLeft, Share2, Bookmark, Trash2, Clock } from "lucide-react";
+import { Heart, ArrowLeft, Share2, Bookmark, Trash2, Clock, CheckCircle2, Circle, Wifi } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getPostById, getAuthorById, posts as allMockPosts } from "../data/mockData";
-import { getPostByBlobId, clapPost, deletePost } from "../lib/postStorage";
+import { getPostByBlobId, clapPost, deletePost, shelby } from "../lib/postStorage";
 import { useAuth } from "../hooks/useAuth";
-import { PostSkeleton } from "../components/Skeleton";
+import type { ShelbyRetrievalTrace } from "../lib/shelby";
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-}
+// ── Reading progress bar ───────────────────────────────────────────────────────
 
 function ReadingProgress() {
   const [progress, setProgress] = useState(0);
@@ -31,12 +29,124 @@ function ReadingProgress() {
   );
 }
 
+// ── Shelby retrieval animation ─────────────────────────────────────────────────
+
+function ShelbyRetrieval({ blobId, onComplete }: { blobId: string; onComplete: () => void }) {
+  const [revealed, setRevealed] = useState<number>(0);   // how many steps are visible
+  const [done, setDone]         = useState(false);
+
+  const trace: ShelbyRetrievalTrace = shelby.buildRetrievalTrace(blobId, false);
+
+  useEffect(() => {
+    let step = 0;
+    function next() {
+      if (step >= trace.steps.length) {
+        setDone(true);
+        setTimeout(onComplete, 460);
+        return;
+      }
+      const delay = trace.steps[step].ms + 60;
+      step += 1;
+      setRevealed(step);
+      setTimeout(next, delay);
+    }
+    const t = setTimeout(next, 180);
+    return () => clearTimeout(t);
+  }, [blobId]);
+
+  const short = blobId.length > 18 ? blobId.slice(0, 18) + "…" : blobId;
+
+  return (
+    <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4 py-12">
+      <div
+        className="w-full max-w-sm rounded-2xl p-6 animate-fade-up"
+        style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.07)",
+        }}
+      >
+        {/* Header */}
+        <div className="flex items-center gap-2.5 mb-5">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, rgba(139,92,246,0.3), rgba(34,211,238,0.2))", border: "1px solid rgba(139,92,246,0.25)" }}
+          >
+            <Wifi size={13} className="text-violet-300" />
+          </div>
+          <div>
+            <p className="text-xs font-bold text-foreground uppercase tracking-widest">Shelby Network</p>
+            <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{short}</p>
+          </div>
+        </div>
+
+        {/* Steps */}
+        <div className="space-y-2.5">
+          {trace.steps.map((step, i) => {
+            const visible  = i < revealed;
+            const active   = i === revealed - 1 && !done;
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-3 transition-all duration-300"
+                style={{ opacity: visible ? 1 : 0.15 }}
+              >
+                {visible ? (
+                  <CheckCircle2
+                    size={13}
+                    className="flex-shrink-0 transition-all"
+                    style={{ color: active ? "#a78bfa" : "#34d399" }}
+                  />
+                ) : (
+                  <Circle size={13} className="flex-shrink-0 text-muted-foreground/25" />
+                )}
+                <span
+                  className="text-xs flex-1"
+                  style={{ color: visible ? (active ? "#c4b5fd" : "hsl(240 8% 65%)") : "hsl(240 8% 28%)" }}
+                >
+                  {step.label}
+                </span>
+                {visible && !active && (
+                  <span className="text-[10px] font-mono flex-shrink-0" style={{ color: "#34d399" }}>
+                    {step.ms > 0 ? `${step.ms}ms` : "—"}
+                  </span>
+                )}
+                {active && (
+                  <span
+                    className="w-3 h-3 rounded-full flex-shrink-0 animate-pulse"
+                    style={{ background: "rgba(167,139,250,0.5)" }}
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        {done && (
+          <div
+            className="mt-5 pt-4 flex items-center gap-2 animate-fade-in"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: "#34d399" }} />
+            <span className="text-xs text-emerald-400">
+              {trace.totalMs}ms total · via {trace.nodeId}
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Article body ───────────────────────────────────────────────────────────────
+
 function ArticleBody({ content }: { content: string }) {
   const paragraphs = content.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
   return (
     <div className="mt-8 sm:mt-10">
       {paragraphs.map((para, i) => (
-        <p key={i}
+        <p
+          key={i}
           className={`text-[1.0625rem] sm:text-[1.125rem] leading-[1.9] mb-6 sm:mb-7 tracking-[0.012em] ${i === 0 ? "drop-cap" : ""}`}
           style={{ fontFamily: "var(--app-font-serif)", color: "hsl(240 15% 85%)" }}
         >
@@ -47,30 +157,37 @@ function ArticleBody({ content }: { content: string }) {
   );
 }
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
+// ── Page ───────────────────────────────────────────────────────────────────────
+
 export default function PostPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [, navigate] = useLocation();
-  const [loading, setLoading] = useState(true);
+
+  const [phase, setPhase]           = useState<"retrieving" | "reading">("retrieving");
   const [bookmarked, setBookmarked] = useState(false);
-  const [clapped, setClapped] = useState(false);
-  const [clapCount, setClapCount] = useState<number | null>(null);
+  const [clapped, setClapped]       = useState(false);
+  const [clapCount, setClapCount]   = useState<number | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied]         = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const t = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(t);
+    setPhase("retrieving");
+    setClapped(false);
+    setClapCount(null);
   }, [id]);
 
-  const isBlob = id?.startsWith("blob_");
+  const isBlob    = id?.startsWith("blob_");
   const localPost = isBlob ? getPostByBlobId(id) : undefined;
-  const mockPost = !isBlob ? getPostById(id) : undefined;
+  const mockPost  = !isBlob ? getPostById(id) : undefined;
   const mockAuthor = mockPost ? getAuthorById(mockPost.authorId) : undefined;
   const relatedCards = mockPost ? allMockPosts.filter((p) => p.id !== mockPost.id).slice(0, 2) : [];
 
-  if (loading) return <><ReadingProgress /><PostSkeleton /></>;
   if (!localPost && !mockPost) {
     return (
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-20 text-center">
@@ -80,17 +197,18 @@ export default function PostPage() {
     );
   }
 
-  const title       = localPost?.title      ?? mockPost!.title;
-  const subtitle    = localPost?.subtitle   ?? mockPost!.subtitle;
-  const content     = localPost?.content    ?? mockPost!.content;
+  const title       = localPost?.title       ?? mockPost!.title;
+  const subtitle    = localPost?.subtitle    ?? mockPost!.subtitle;
+  const content     = localPost?.content     ?? mockPost!.content;
   const publishedAt = localPost ? formatDate(localPost.publishedAt) : mockPost!.publishedAt;
-  const readTime    = localPost?.readTime   ?? mockPost!.readTime;
-  const tags        = localPost?.tags       ?? mockPost!.tags;
-  const authorName  = localPost?.authorName ?? mockAuthor!.name;
+  const readTime    = localPost?.readTime    ?? mockPost!.readTime;
+  const tags        = localPost?.tags        ?? mockPost!.tags;
+  const authorName  = localPost?.authorName  ?? mockAuthor!.name;
   const authorInitials = localPost ? localPost.authorName.charAt(0).toUpperCase() : mockAuthor!.avatarInitials;
   const authorColor    = localPost ? "#8b5cf6" : mockAuthor!.avatarColor;
   const isOwner        = localPost && user?.walletId === localPost.authorWalletId;
   const displayClaps   = clapCount ?? (localPost?.claps ?? mockPost!.claps);
+  const traceBlobId    = id ?? "blob_unknown";
 
   function handleClap() {
     if (clapped) return;
@@ -104,8 +222,23 @@ export default function PostPage() {
   }
 
   function handleShare() {
-    navigator.clipboard.writeText(window.location.href).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true); setTimeout(() => setCopied(false), 2000);
+    });
   }
+
+  // ── Retrieval phase ────────────────────────────────────────────────────────
+
+  if (phase === "retrieving") {
+    return (
+      <>
+        <ReadingProgress />
+        <ShelbyRetrieval blobId={traceBlobId} onComplete={() => setPhase("reading")} />
+      </>
+    );
+  }
+
+  // ── Reading phase ──────────────────────────────────────────────────────────
 
   return (
     <>
@@ -173,6 +306,17 @@ export default function PostPage() {
           </div>
         </header>
 
+        {/* Blob provenance chip */}
+        <div className="mb-5 flex items-center gap-2">
+          <span
+            className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1 rounded-full"
+            style={{ background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.18)", color: "#a78bfa" }}
+          >
+            <Wifi size={9} />
+            {traceBlobId}
+          </span>
+        </div>
+
         <div style={{ height: "1px", background: "rgba(255,255,255,0.07)" }} />
 
         <article><ArticleBody content={content} /></article>
@@ -195,20 +339,12 @@ export default function PostPage() {
             {displayClaps.toLocaleString()}
           </button>
           <span className="text-sm text-muted-foreground">
-            {clapped ? "Thanks for reading." : "Did this resonate with you?"}
+            {clapped ? "Thanks for reading." : "Did this resonate?"}
           </span>
         </div>
 
-        {localPost && (
-          <div className="mt-3">
-            <span className="text-[10px] font-mono px-2 py-1 rounded" style={{ background: "rgba(255,255,255,0.04)", color: "hsl(240 8% 35%)" }}>
-              {localPost.blobId}
-            </span>
-          </div>
-        )}
-
         {/* Author card */}
-        <div className="mt-10 pt-8 glass-card rounded-2xl p-5 sm:p-6" style={{ marginTop: "2.5rem" }}>
+        <div className="mt-10 glass-card rounded-2xl p-5 sm:p-6">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0"
               style={{ backgroundColor: authorColor }}>
@@ -253,8 +389,7 @@ export default function PostPage() {
                   <Link key={related.id} href={`/post/${related.id}`}>
                     <div className="glass-card rounded-xl p-4 group cursor-pointer">
                       <div className="flex items-center gap-2 mb-2">
-                        <div className="w-4 h-4 rounded-full flex-shrink-0"
-                          style={{ backgroundColor: relAuthor.avatarColor }} />
+                        <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: relAuthor.avatarColor }} />
                         <span className="text-xs text-muted-foreground">{relAuthor.name}</span>
                       </div>
                       <p className="font-semibold text-foreground group-hover:text-violet-300 transition-colors leading-snug text-sm"

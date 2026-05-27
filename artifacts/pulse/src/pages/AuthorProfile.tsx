@@ -53,7 +53,7 @@ export default function AuthorProfile() {
           <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 ring-4"
             style={{
               backgroundColor: author.avatarColor,
-              ringColor: "rgba(9,9,20,1)",
+
               boxShadow: `0 0 0 4px hsl(237 45% 4%), 0 0 20px ${author.avatarColor}50`,
             }}>
             {author.avatarInitials}

@@ -57,13 +57,14 @@ export default function ProfilePage() {
 
   if (!user) return null;
 
-  const posts = getPostsByWallet(user.walletId);
+  const walletId = user.walletId;
+  const posts = getPostsByWallet(walletId);
   const draft = loadDraft();
   const hasDraft = !!(draft?.title || draft?.content);
   const totalClaps = posts.reduce((sum, p) => sum + p.claps, 0);
 
   function copyWalletId() {
-    navigator.clipboard.writeText(user.walletId).then(() => {
+    navigator.clipboard.writeText(walletId).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });

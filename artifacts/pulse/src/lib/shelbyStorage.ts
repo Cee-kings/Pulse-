@@ -1,3 +1,13 @@
+/**
+ * shelbyStorage — legacy raw key/value store.
+ *
+ * ⚠️  This module is now superseded by src/lib/shelby/ (the Shelby client layer).
+ *
+ * It is kept only as the low-level persistence primitive used by LocalShelbyAdapter
+ * and for any code that hasn't been migrated yet.  New code should import from
+ * src/lib/shelby/index.ts and use the IShelbyClient interface instead.
+ */
+
 export type StorageKey = string;
 
 export interface StorageItem<T = unknown> {
@@ -18,9 +28,7 @@ export const shelbyStorage = {
       if (!raw) return null;
       const item = JSON.parse(raw) as StorageItem<T>;
       return item.value;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   },
 
   set<T>(key: StorageKey, value: T): void {
@@ -29,40 +37,18 @@ export const shelbyStorage = {
       const createdAt = existing
         ? (JSON.parse(existing) as StorageItem<T>).createdAt
         : now();
-      const item: StorageItem<T> = {
-        key,
-        value,
-        createdAt,
-        updatedAt: now(),
-      };
-      localStorage.setItem(key, JSON.stringify(item));
-    } catch {
-      console.warn(`[shelbyStorage] Failed to set key "${key}"`);
-    }
+      localStorage.setItem(key, JSON.stringify({ key, value, createdAt, updatedAt: now() }));
+    } catch { console.warn(`[shelbyStorage] Failed to set "${key}"`); }
   },
 
   remove(key: StorageKey): void {
-    try {
-      localStorage.removeItem(key);
-    } catch {
-      console.warn(`[shelbyStorage] Failed to remove key "${key}"`);
-    }
-  },
-
-  clear(): void {
-    try {
-      localStorage.clear();
-    } catch {
-      console.warn("[shelbyStorage] Failed to clear storage");
-    }
+    try { localStorage.removeItem(key); }
+    catch { console.warn(`[shelbyStorage] Failed to remove "${key}"`); }
   },
 
   keys(): StorageKey[] {
-    try {
-      return Object.keys(localStorage);
-    } catch {
-      return [];
-    }
+    try { return Object.keys(localStorage); }
+    catch { return []; }
   },
 };
 
