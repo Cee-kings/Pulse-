@@ -7,6 +7,7 @@ import HomeFeed from "@/pages/HomeFeed";
 import WritePage from "@/pages/WritePage";
 import PostPage from "@/pages/PostPage";
 import AuthorProfile from "@/pages/AuthorProfile";
+import ProfilePage from "@/pages/ProfilePage";
 import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ function AppContent() {
         <Route path="/" component={HomeFeed} />
         <Route path="/write" component={WritePage} />
         <Route path="/post/:id" component={PostPage} />
+        <Route path="/profile" component={ProfilePage} />
         <Route path="/author/:id" component={AuthorProfile} />
         <Route>
           <div className="max-w-2xl mx-auto px-6 py-20 text-center">

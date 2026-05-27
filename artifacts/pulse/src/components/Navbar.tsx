@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { PenLine, ChevronDown, LogOut } from "lucide-react";
+import { PenLine, ChevronDown, LogOut, User } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 export default function Navbar() {
@@ -43,9 +43,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen((o) => !o)}
                 className="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-muted transition-colors"
               >
-                <div
-                  className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold select-none"
-                >
+                <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center text-primary text-xs font-bold select-none">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
                 <div className="hidden sm:flex flex-col items-start leading-none">
@@ -59,23 +57,30 @@ export default function Navbar() {
 
               {menuOpen && (
                 <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setMenuOpen(false)}
-                  />
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                   <div className="absolute right-0 top-full mt-2 w-56 bg-white border border-border rounded-xl shadow-lg z-50 overflow-hidden">
+                    {/* Identity block */}
                     <div className="px-4 py-3 border-b border-border">
                       <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
                       <p className="text-[11px] font-mono text-muted-foreground mt-0.5 truncate">
                         {user.walletId}
                       </p>
                     </div>
+
+                    {/* Profile link */}
+                    <Link
+                      href="/profile"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    >
+                      <User size={14} />
+                      My profile
+                    </Link>
+
+                    {/* Sign out */}
                     <button
-                      onClick={() => {
-                        setMenuOpen(false);
-                        logout();
-                      }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                      onClick={() => { setMenuOpen(false); logout(); }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border-t border-border"
                     >
                       <LogOut size={14} />
                       Sign out
