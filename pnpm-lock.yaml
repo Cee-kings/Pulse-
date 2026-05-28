@@ -403,6 +403,10 @@ importers:
         version: 3.25.76
 
   artifacts/pulse:
+    dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.1054.0
+        version: 3.1054.0
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
