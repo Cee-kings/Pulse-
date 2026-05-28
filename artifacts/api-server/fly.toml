@@ -1,3 +1,8 @@
+# fly.toml app configuration file generated for puiseapp on 2026-05-28T13:52:16Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
 app = 'puiseapp'
 primary_region = 'ams'
 
@@ -15,3 +20,4 @@ primary_region = 'ams'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+  memory_mb = 1024
