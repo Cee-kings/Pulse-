@@ -1,0 +1,17 @@
+network:
+  name: shelbynet
+  rpcEndpoint: https://api.shelbynet.shelby.xyz/shelby
+  aptosFullnode: https://api.shelbynet.shelby.xyz/v1
+  aptosIndexer: https://api.shelbynet.shelby.xyz/v1/graphql
+  apiKey: aptoslabs_UWtbHsbh86T_9yGgaR6XHtMhWkV96bFrFSfhzph4uTHdb
+
+server:
+  port: 9000
+
+credentials:
+  - accessKeyId: AKIAIOSFODNN7EXAMPLE
+    secretAccessKey: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+    aptosPrivateKey: ed25519-priv-0x1637de01f8f3a5fa0d323ae9c1698d88852a89f65d648fa2430d82a58a4b56fb
+
+buckets:
+  - "0xe9ff89c774c7aed929d02bd419312e88c6b0557b14455334b762927fb540241e"
