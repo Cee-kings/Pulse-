@@ -71,8 +71,9 @@ export function publishPost(params: {
   authorWalletId: string;
   authorName: string;
 }): LocalPost {
+  // Build post with empty blobId — filled in from the receipt
   const post: LocalPost = {
-    blobId: "",            // filled in after shelby.put()
+    blobId: "",
     title: params.title.trim() || "Untitled",
     subtitle: params.subtitle.trim(),
     content: params.content.trim(),
@@ -84,22 +85,22 @@ export function publishPost(params: {
     claps: 0,
   };
 
+  // shelby.put() stores the blob and returns a receipt with the generated blobId
   const receipt = shelby.put<LocalPost>(post, {
     type: "post",
     authorWalletId: params.authorWalletId,
   });
 
-  // Back-fill the blobId that Shelby generated, then patch the stored content
+  // Write the blobId back into the stored blob so it's self-contained
   post.blobId = receipt.blobId;
-  shelby.patchMeta(receipt.blobId, { blobId: receipt.blobId });
-  // Update content with the real blobId
-  const blob = shelby.get<LocalPost>(receipt.blobId);
-  if (blob) {
-    const updated = { ...blob, content: { ...blob.content, blobId: receipt.blobId } };
-    // Re-write via a second put using the same blobId indirectly via patchMeta
-    // We store the corrected post directly in localStorage under the blob key
-    const key = "shelby:blob:" + receipt.blobId;
-    localStorage.setItem(key, JSON.stringify(updated));
+  const stored = shelby.get<LocalPost>(receipt.blobId);
+  if (stored) {
+    shelby.patchMeta(receipt.blobId, { blobId: receipt.blobId });
+    // Update the content field with the correct blobId directly in localStorage
+    localStorage.setItem(
+      "shelby:blob:" + receipt.blobId,
+      JSON.stringify({ ...stored, content: { ...stored.content, blobId: receipt.blobId } })
+    );
   }
 
   clearDraft();
@@ -109,10 +110,11 @@ export function publishPost(params: {
 export function clapPost(blobId: string): void {
   const blob = shelby.get<LocalPost>(blobId);
   if (!blob) return;
-  const updated = { ...blob, content: { ...blob.content, claps: blob.content.claps + 1 } };
-  localStorage.setItem("shelby:blob:" + blobId, JSON.stringify(updated));
-  // Invalidate cache by re-writing through internal cache path
-  // (The adapter re-reads from localStorage on next get())
+  // Write the incremented clap count directly to localStorage
+  localStorage.setItem(
+    "shelby:blob:" + blobId,
+    JSON.stringify({ ...blob, content: { ...blob.content, claps: blob.content.claps + 1 } })
+  );
 }
 
 export function deletePost(blobId: string): void {
@@ -138,6 +140,6 @@ export function clearDraft(): void {
   shelby.clearDraft(DRAFT_KEY);
 }
 
-// ── Network helpers (passed through to UI) ────────────────────────────────────
+// ── Re-export shelby for UI components that need network stats / traces ────────
 
 export { shelby } from "./shelby";

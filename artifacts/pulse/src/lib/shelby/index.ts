@@ -22,6 +22,7 @@ migrateFromLegacyStorage(adapter);
 
 export const shelby: IShelbyClient = adapter;
 
+// Re-export all types so consumers only need one import path
 export type { IShelbyClient } from "./types";
 export type {
   ShelbyBlob,
