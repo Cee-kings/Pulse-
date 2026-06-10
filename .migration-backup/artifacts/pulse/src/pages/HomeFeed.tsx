@@ -158,7 +158,12 @@ export default function HomeFeed() {
     return () => clearTimeout(t);
   }, []);
 
-  const localPosts = getAllPosts();
+  let localPosts: LocalPost[] = [];
+  try {
+    localPosts = getAllPosts();
+  } catch {
+    localPosts = [];
+  }
   const allCards: FeedCardData[] = [
     ...localPosts.map(localToCard),
     ...mockPosts

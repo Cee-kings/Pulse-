@@ -9,7 +9,7 @@ router.get("/blobs", async (req, res) => {
     const keys = await shelbyClient.list(prefix);
     res.json({ keys });
   } catch {
-    res.status(500).json({ error: "Failed to list blobs" });
+    res.json({ keys: [] });
   }
 });
 
