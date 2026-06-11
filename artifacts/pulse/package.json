@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@aptos-labs/ts-sdk": "^7.1.0",
     "@aptos-labs/wallet-adapter-react": "^8.3.3",
     "@aws-sdk/client-s3": "^3.1054.0",
     "@telegram-apps/bridge": "^2.11.0",

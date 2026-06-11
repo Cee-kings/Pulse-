@@ -4,25 +4,19 @@ import {
   AuthContext,
   saveUser,
   clearUser,
-  loadDisplayName,
   type PulseUser,
 } from "../hooks/useAuth";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const { connected, account, disconnect } = useWallet();
+  const { connected, disconnect } = useWallet();
   const [user, setUser] = useState<PulseUser | null>(null);
 
   useEffect(() => {
-    if (connected && account?.address) {
-      const address = account.address.toString();
-      const name = loadDisplayName() ?? undefined;
-      const newUser = saveUser(address, name);
-      setUser(newUser);
-    } else {
+    if (!connected) {
       clearUser();
       setUser(null);
     }
-  }, [connected, account?.address]);
+  }, [connected]);
 
   function login(address: string, name?: string) {
     const newUser = saveUser(address, name);
