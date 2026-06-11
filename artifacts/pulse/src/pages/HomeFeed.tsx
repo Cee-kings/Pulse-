@@ -144,7 +144,7 @@ function mockToCard(post: Post, author: Author): FeedCardData {
     id: post.id, href: `/post/${post.id}`,
     title: post.title, preview: post.subtitle || excerpt(post.content),
     authorName: author.name, authorInitials: author.avatarInitials, authorColor: author.avatarColor,
-    authorHref: `/author/${author.id}`,
+    authorHref: `/u/${author.username}`,
     date: post.publishedAt, readTime: post.readTime, claps: post.claps, tags: post.tags,
   };
 }
@@ -279,19 +279,19 @@ export default function HomeFeed() {
             <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-4">Who to read</h3>
             <div className="space-y-3.5">
               {[
-                { name: "Nadia Bloom",  bio: "Slow living & essays", initials: "NB", color: "#b54f2a", id: "author-3" },
-                { name: "Theo Park",    bio: "Philosophy & AI",      initials: "TP", color: "#1a6b8a", id: "author-4" },
-                { name: "Leila Santos", bio: "Food & memory",        initials: "LS", color: "#8a3a6b", id: "author-5" },
+                { name: "Nadia Bloom",  bio: "Slow living & essays", initials: "NB", color: "#b54f2a", id: "author-3", username: "nadiabloom" },
+                { name: "Theo Park",    bio: "Philosophy & AI",      initials: "TP", color: "#1a6b8a", id: "author-4", username: "theopark" },
+                { name: "Leila Santos", bio: "Food & memory",        initials: "LS", color: "#8a3a6b", id: "author-5", username: "leilasantos" },
               ].map((person) => (
                 <div key={person.id} className="flex items-center gap-2.5">
-                  <Link href={`/author/${person.id}`}>
+                  <Link href={`/u/${person.username}`}>
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 cursor-pointer transition-transform hover:scale-110"
                       style={{ backgroundColor: person.color }}>
                       {person.initials}
                     </div>
                   </Link>
                   <div className="flex-1 min-w-0">
-                    <Link href={`/author/${person.id}`}>
+                    <Link href={`/u/${person.username}`}>
                       <p className="text-xs font-medium text-foreground truncate hover:text-violet-300 transition-colors cursor-pointer">{person.name}</p>
                     </Link>
                     <p className="text-[11px] text-muted-foreground truncate">{person.bio}</p>

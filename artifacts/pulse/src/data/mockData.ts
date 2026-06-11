@@ -321,6 +321,10 @@ export function getAuthorById(id: string): Author | undefined {
   return authors.find((a) => a.id === id);
 }
 
+export function getAuthorByUsername(username: string): Author | undefined {
+  return authors.find((a) => a.username.toLowerCase() === username.toLowerCase());
+}
+
 export function getPostById(id: string): Post | undefined {
   return posts.find((p) => p.id === id);
 }

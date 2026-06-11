@@ -353,7 +353,7 @@ export default function PostPage() {
             <div className="flex-1 min-w-0">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Written by</p>
               {mockAuthor ? (
-                <Link href={`/author/${mockAuthor.id}`} className="font-semibold text-foreground hover:text-violet-300 transition-colors">
+                <Link href={`/u/${mockAuthor.username}`} className="font-semibold text-foreground hover:text-violet-300 transition-colors">
                   {authorName}
                 </Link>
               ) : (

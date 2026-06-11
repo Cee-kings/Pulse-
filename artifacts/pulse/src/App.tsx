@@ -10,6 +10,7 @@ import HomeFeed from "@/pages/HomeFeed";
 import WritePage from "@/pages/WritePage";
 import PostPage from "@/pages/PostPage";
 import AuthorProfile from "@/pages/AuthorProfile";
+import UserProfilePage from "@/pages/UserProfilePage";
 import ProfilePage from "@/pages/ProfilePage";
 import DiscoverPage from "@/pages/DiscoverPage";
 import { useAuth } from "@/hooks/useAuth";
@@ -59,6 +60,9 @@ function AppContent() {
         <Route path="/post/:id" component={PostPage} />
         <Route path="/discover" component={DiscoverPage} />
         <Route path="/profile" component={ProfilePage} />
+        {/* Username-based public profile (preferred) */}
+        <Route path="/u/:username" component={UserProfilePage} />
+        {/* ID-based author profile (legacy / fallback) */}
         <Route path="/author/:id" component={AuthorProfile} />
         <Route>
           <div className="max-w-2xl mx-auto px-6 py-20 text-center">

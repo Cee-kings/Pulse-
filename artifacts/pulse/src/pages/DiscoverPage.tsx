@@ -92,10 +92,10 @@ function NetworkBar({ stats }: { stats: ShelbyNetworkStats }) {
 // ── Staff pick card ────────────────────────────────────────────────────────────
 
 function StaffPickCard({
-  index, postId, title, preview, authorName, authorInitials, authorColor, authorId, tags, readTime, claps, delay,
+  index, postId, title, preview, authorName, authorInitials, authorColor, authorUsername, tags, readTime, claps, delay,
 }: {
   index: number; postId: string; title: string; preview: string; authorName: string;
-  authorInitials: string; authorColor: string; authorId: string; tags: string[];
+  authorInitials: string; authorColor: string; authorUsername: string; tags: string[];
   readTime: number; claps: number; delay: number;
 }) {
   return (
@@ -117,7 +117,7 @@ function StaffPickCard({
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 mb-4">{preview}</p>
 
         <div className="flex items-center gap-2 mb-3">
-          <Link href={`/author/${authorId}`} onClick={(e) => e.stopPropagation()}>
+          <Link href={`/u/${authorUsername}`} onClick={(e) => e.stopPropagation()}>
             <div
               className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0 cursor-pointer transition-transform hover:scale-110"
               style={{ backgroundColor: authorColor }}
@@ -213,7 +213,7 @@ export default function DiscoverPage() {
               </p>
 
               <div className="flex flex-wrap items-center gap-4 mb-5">
-                <Link href={`/author/${heroAuthor.id}`} onClick={(e) => e.stopPropagation()}>
+                <Link href={`/u/${heroAuthor.username}`} onClick={(e) => e.stopPropagation()}>
                   <div className="flex items-center gap-2.5 cursor-pointer">
                     <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 transition-transform hover:scale-110"
                       style={{ backgroundColor: heroAuthor.avatarColor }}>
@@ -258,7 +258,7 @@ export default function DiscoverPage() {
                 title={post.title}
                 preview={excerpt(post.subtitle || post.content)}
                 authorName={author.name} authorInitials={author.avatarInitials}
-                authorColor={author.avatarColor} authorId={author.id}
+                authorColor={author.avatarColor} authorUsername={author.username}
                 tags={post.tags} readTime={post.readTime} claps={post.claps}
                 delay={i * 80}
               />
@@ -278,14 +278,14 @@ export default function DiscoverPage() {
             return (
               <div key={author.id} className="glass-card rounded-2xl p-5 flex flex-col">
                 <div className="flex items-start gap-3 mb-4">
-                  <Link href={`/author/${author.id}`}>
+                  <Link href={`/u/${author.username}`}>
                     <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-base font-bold flex-shrink-0 cursor-pointer transition-transform hover:scale-105"
                       style={{ backgroundColor: author.avatarColor, boxShadow: `0 0 16px ${author.avatarColor}40` }}>
                       {author.avatarInitials}
                     </div>
                   </Link>
                   <div className="min-w-0">
-                    <Link href={`/author/${author.id}`}>
+                    <Link href={`/u/${author.username}`}>
                       <p className="text-sm font-bold text-foreground hover:text-violet-300 transition-colors cursor-pointer truncate">{author.name}</p>
                     </Link>
                     <p className="text-[11px] text-muted-foreground mt-0.5">@{author.username}</p>
@@ -315,7 +315,7 @@ export default function DiscoverPage() {
                   </Link>
                 )}
 
-                <Link href={`/author/${author.id}`}>
+                <Link href={`/u/${author.username}`}>
                   <span className="text-xs font-semibold inline-flex items-center gap-1 transition-colors" style={{ color: "#a78bfa" }}
                     onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#c4b5fd"; }}
                     onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "#a78bfa"; }}>

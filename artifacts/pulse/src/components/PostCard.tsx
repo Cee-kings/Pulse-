@@ -34,7 +34,7 @@ export default function PostCard({ post, author, variant = "default" }: PostCard
   return (
     <article className="py-8 border-b border-border last:border-b-0">
       <div className="flex items-center gap-3 mb-4">
-        <Link href={`/author/${author.id}`}>
+        <Link href={`/u/${author.username}`}>
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold cursor-pointer flex-shrink-0"
             style={{ backgroundColor: author.avatarColor }}
@@ -44,7 +44,7 @@ export default function PostCard({ post, author, variant = "default" }: PostCard
         </Link>
         <div className="flex items-center gap-2 text-sm">
           <Link
-            href={`/author/${author.id}`}
+            href={`/u/${author.username}`}
             className="font-medium text-foreground hover:text-primary transition-colors"
           >
             {author.name}
