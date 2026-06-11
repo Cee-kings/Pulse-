@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { PenLine, ChevronDown, LogOut, User, Sparkles } from "lucide-react";
+import { PenLine, ChevronDown, LogOut, User, Sparkles, Wallet } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+
+function shortAddr(addr: string): string {
+  if (!addr) return "";
+  if (addr.length <= 12) return addr;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
 
 export default function Navbar() {
   const [location] = useLocation();
@@ -67,12 +73,13 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setMenuOpen((o) => !o)}
-                className="flex items-center gap-1.5 sm:gap-2 pl-1 pr-1.5 sm:pr-2 py-1 rounded-full transition-all hover:bg-white/5"
+                className="flex items-center gap-1.5 sm:gap-2 pl-1 pr-2 py-1 rounded-full transition-all hover:bg-white/5"
+                style={{ border: "1px solid rgba(255,255,255,0.08)" }}
                 aria-label="Account menu"
                 aria-expanded={menuOpen}
               >
                 <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 transition-all"
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
                   style={{
                     background: "linear-gradient(135deg, #8b5cf6, #22d3ee)",
                     boxShadow: menuOpen ? "0 0 0 2px rgba(167,139,250,0.4)" : undefined,
@@ -80,9 +87,11 @@ export default function Navbar() {
                 >
                   {user.name.charAt(0).toUpperCase()}
                 </div>
-                <div className="hidden sm:flex flex-col items-start leading-none max-w-[110px]">
-                  <span className="text-xs font-medium text-foreground truncate w-full">{user.name}</span>
-                  <span className="text-[10px] text-muted-foreground font-mono mt-0.5 truncate w-full">{user.walletId}</span>
+                <div className="hidden sm:flex flex-col items-start leading-none">
+                  <span className="text-xs font-medium text-foreground">{user.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono mt-0.5 tracking-tight">
+                    {shortAddr(user.walletId)}
+                  </span>
                 </div>
                 <ChevronDown
                   size={12}
@@ -94,18 +103,24 @@ export default function Navbar() {
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
                   <div
-                    className="absolute right-0 top-full mt-2 w-52 rounded-2xl z-50 overflow-hidden py-2"
+                    className="absolute right-0 top-full mt-2 w-56 rounded-2xl z-50 overflow-hidden py-2"
                     style={{
-                      background: "rgba(12,12,25,0.92)",
+                      background: "rgba(12,12,25,0.95)",
                       backdropFilter: "blur(30px)",
                       WebkitBackdropFilter: "blur(30px)",
                       border: "1px solid rgba(255,255,255,0.1)",
                       boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(167,139,250,0.1)",
                     }}
                   >
-                    <div className="px-4 py-2.5 mb-1" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
-                      <p className="text-sm font-semibold text-foreground truncate">{user.name}</p>
-                      <p className="text-[11px] font-mono text-muted-foreground mt-0.5 truncate">{user.walletId}</p>
+                    {/* Wallet identity header */}
+                    <div className="px-4 py-3 mb-1" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                      <p className="text-xs font-semibold text-foreground truncate mb-1">{user.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <Wallet size={11} className="text-violet-400 shrink-0" />
+                        <p className="text-[11px] font-mono text-muted-foreground truncate">
+                          {shortAddr(user.walletId)}
+                        </p>
+                      </div>
                     </div>
 
                     {[
@@ -117,7 +132,6 @@ export default function Navbar() {
                         href={href}
                         onClick={() => setMenuOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        style={{ transition: "background 0.15s" }}
                         onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.05)"; }}
                         onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ""; }}
                       >
@@ -128,11 +142,13 @@ export default function Navbar() {
                     <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", marginTop: "4px", paddingTop: "4px" }}>
                       <button
                         onClick={() => { setMenuOpen(false); logout(); }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm text-muted-foreground hover:text-red-400 transition-colors"
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = ""; }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2 text-sm transition-colors"
+                        style={{ color: "rgba(248,113,113,0.8)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.08)"; e.currentTarget.style.color = "rgb(248,113,113)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = ""; e.currentTarget.style.color = "rgba(248,113,113,0.8)"; }}
                       >
-                        <LogOut size={14} /> Sign out
+                        <LogOut size={14} />
+                        Disconnect wallet
                       </button>
                     </div>
                   </div>
