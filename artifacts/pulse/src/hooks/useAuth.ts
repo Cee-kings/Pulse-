@@ -7,8 +7,16 @@ export interface PulseUser {
   createdAt: string;
 }
 
+export interface VerifiedSession {
+  address: string;
+  verifiedAt: string;
+  name?: string;
+}
+
 const STORAGE_KEY = "pulse_user";
 const DISPLAY_NAME_KEY = "pulse_display_name";
+const SESSION_KEY = "pulse_verified_session";
+const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export function saveDisplayName(name: string): void {
   shelbyStorage.set<string>(DISPLAY_NAME_KEY, name);
@@ -18,13 +26,40 @@ export function loadDisplayName(): string | null {
   return shelbyStorage.get<string>(DISPLAY_NAME_KEY);
 }
 
+export function saveSession(address: string, name?: string): void {
+  const session: VerifiedSession = {
+    address,
+    verifiedAt: new Date().toISOString(),
+    name: name?.trim() || undefined,
+  };
+  shelbyStorage.set<VerifiedSession>(SESSION_KEY, session);
+}
+
+export function loadSession(): VerifiedSession | null {
+  const session = shelbyStorage.get<VerifiedSession>(SESSION_KEY);
+  if (!session) return null;
+  const age = Date.now() - new Date(session.verifiedAt).getTime();
+  if (age > SESSION_TTL_MS) {
+    shelbyStorage.remove(SESSION_KEY);
+    return null;
+  }
+  return session;
+}
+
+export function clearSession(): void {
+  shelbyStorage.remove(SESSION_KEY);
+}
+
 function shortAddress(addr: string): string {
   if (addr.length > 10) return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
   return addr;
 }
 
 export function saveUser(address: string, name?: string): PulseUser {
-  const displayName = (name && name.trim()) ? name.trim() : (loadDisplayName() || shortAddress(address));
+  const displayName =
+    name && name.trim()
+      ? name.trim()
+      : loadDisplayName() || shortAddress(address);
   const user: PulseUser = {
     name: displayName,
     walletId: address,

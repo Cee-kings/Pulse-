@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import { Ed25519PublicKey, Ed25519Signature } from "@aptos-labs/ts-sdk";
-import { useAuth } from "../hooks/useAuth";
-import { saveDisplayName } from "../hooks/useAuth";
+import { useAuth, saveDisplayName, saveSession } from "../hooks/useAuth";
 import { Sparkles, Wallet, ShieldCheck, AlertCircle } from "lucide-react";
 
 type Phase = "idle" | "connecting" | "sign" | "signing" | "verifying" | "error";
@@ -92,11 +91,13 @@ export default function LoginScreen() {
         return;
       }
 
-      if (name.trim()) {
-        saveDisplayName(name.trim());
+      const displayName = name.trim() || undefined;
+      if (displayName) {
+        saveDisplayName(displayName);
       }
 
-      login(address, name.trim() || undefined);
+      saveSession(address, displayName);
+      login(address, displayName);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setErrorMsg(msg || "Signing was rejected or failed.");

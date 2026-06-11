@@ -72,7 +72,7 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AptosWalletAdapterProvider plugins={wallets} autoConnect={false}>
+      <AptosWalletAdapterProvider plugins={wallets} autoConnect={true}>
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <AuthProvider>
             <AppContent />
