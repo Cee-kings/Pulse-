@@ -8,6 +8,7 @@ export interface Author {
   followers: number;
   following: number;
   joinedDate: string;
+  walletId?: string;
 }
 
 export interface Post {
@@ -33,6 +34,7 @@ export const authors: Author[] = [
     followers: 4821,
     following: 312,
     joinedDate: "March 2023",
+    walletId: "0x3f8a1d2e9c4b7f0e5a6d3c1b8e2f9a4d7c0b5e8f",
   },
   {
     id: "author-2",
@@ -44,6 +46,7 @@ export const authors: Author[] = [
     followers: 2139,
     following: 88,
     joinedDate: "January 2024",
+    walletId: "0x7c2e5a8f1b4d9e3c6a0f2b5e8c1d4a7f0e3b6c9d",
   },
   {
     id: "author-3",
@@ -55,6 +58,7 @@ export const authors: Author[] = [
     followers: 9304,
     following: 221,
     joinedDate: "June 2022",
+    walletId: "0xa1f4e7b2d5c8f0e3a6b9c2d5e8f1a4b7c0d3e6f9",
   },
   {
     id: "author-4",
@@ -66,6 +70,7 @@ export const authors: Author[] = [
     followers: 6712,
     following: 144,
     joinedDate: "September 2022",
+    walletId: "0x5d8b1e4a7f0c3d6b9e2a5c8f1d4a7b0e3c6d9f2a",
   },
   {
     id: "author-5",
@@ -77,6 +82,7 @@ export const authors: Author[] = [
     followers: 3480,
     following: 410,
     joinedDate: "April 2023",
+    walletId: "0x2b5e8c1f4a7d0b3e6c9f2a5b8e1d4c7f0a3b6e9c",
   },
   {
     id: "author-6",
@@ -88,6 +94,7 @@ export const authors: Author[] = [
     followers: 1890,
     following: 67,
     joinedDate: "November 2023",
+    walletId: "0x9e2a5f8b1d4c7e0a3b6f9c2d5a8e1b4f7c0d3a6e",
   },
 ];
 

@@ -4,6 +4,7 @@ import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
 import { PetraWallet } from "petra-plugin-wallet-adapter";
 import AuthProvider from "@/components/AuthProvider";
 import LoginScreen from "@/components/LoginScreen";
+import UsernamePrompt from "@/components/UsernamePrompt";
 import Navbar from "@/components/Navbar";
 import HomeFeed from "@/pages/HomeFeed";
 import WritePage from "@/pages/WritePage";
@@ -36,7 +37,7 @@ function MeshBackground() {
 }
 
 function AppContent() {
-  const { user } = useAuth();
+  const { user, showUsernamePrompt } = useAuth();
 
   if (!user) {
     return (
@@ -51,6 +52,7 @@ function AppContent() {
     <>
       <MeshBackground />
       <Navbar />
+      {showUsernamePrompt && <UsernamePrompt />}
       <Switch>
         <Route path="/" component={HomeFeed} />
         <Route path="/write" component={WritePage} />

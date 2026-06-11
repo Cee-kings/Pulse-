@@ -1,5 +1,6 @@
 import { useParams, Link } from "wouter";
-import { ArrowLeft, Heart, Clock, Users } from "lucide-react";
+import { ArrowLeft, Heart, Clock, Users, Wallet, ExternalLink, Copy, Check } from "lucide-react";
+import { useState } from "react";
 import { getAuthorById, getPostsByAuthor } from "../data/mockData";
 
 function excerpt(text: string, max = 120): string {
@@ -7,10 +8,16 @@ function excerpt(text: string, max = 120): string {
   return clean.length > max ? clean.slice(0, max).trimEnd() + "…" : clean;
 }
 
+function shortAddr(addr: string): string {
+  if (addr.length <= 12) return addr;
+  return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+}
+
 export default function AuthorProfile() {
   const { id } = useParams<{ id: string }>();
   const author = getAuthorById(id);
   const authorPosts = author ? getPostsByAuthor(author.id) : [];
+  const [copied, setCopied] = useState(false);
 
   if (!author) {
     return (
@@ -22,6 +29,14 @@ export default function AuthorProfile() {
   }
 
   const totalClaps = authorPosts.reduce((sum, p) => sum + p.claps, 0);
+
+  function copyWallet() {
+    if (!author.walletId) return;
+    navigator.clipboard.writeText(author.walletId).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   return (
     <div className="max-w-[720px] mx-auto px-4 sm:px-6 py-8 animate-fade-up">
@@ -38,22 +53,18 @@ export default function AuthorProfile() {
           background: `linear-gradient(135deg, ${author.avatarColor}35 0%, rgba(139,92,246,0.2) 50%, rgba(34,211,238,0.15) 100%)`,
           border: "1px solid rgba(255,255,255,0.07)",
         }}>
-        {/* Decorative glow orb */}
         <div className="absolute top-0 left-1/4 w-48 h-48 rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${author.avatarColor}40, transparent 70%)`, filter: "blur(40px)" }}
-        />
+          style={{ background: `radial-gradient(circle, ${author.avatarColor}40, transparent 70%)`, filter: "blur(40px)" }} />
         <div className="absolute -top-8 right-1/4 w-32 h-32 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, rgba(34,211,238,0.2), transparent 70%)", filter: "blur(30px)" }}
-        />
+          style={{ background: "radial-gradient(circle, rgba(34,211,238,0.2), transparent 70%)", filter: "blur(30px)" }} />
       </div>
 
-      {/* Avatar + header — overlap the banner */}
+      {/* Avatar + header */}
       <div className="px-4 sm:px-6 -mt-10 mb-6 relative">
         <div className="flex items-end justify-between gap-4 mb-5">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0 ring-4"
+          <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
             style={{
               backgroundColor: author.avatarColor,
-
               boxShadow: `0 0 0 4px hsl(237 45% 4%), 0 0 20px ${author.avatarColor}50`,
             }}>
             {author.avatarInitials}
@@ -70,6 +81,34 @@ export default function AuthorProfile() {
         <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{author.name}</h1>
         <p className="text-sm text-muted-foreground mt-1">@{author.username} · Member since {author.joinedDate}</p>
         <p className="text-base text-foreground/80 leading-relaxed mt-3 max-w-lg">{author.bio}</p>
+
+        {/* Wallet identity */}
+        {author.walletId && (
+          <div className="mt-4 inline-flex items-center gap-3 rounded-xl px-4 py-2.5"
+            style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)" }}>
+            <Wallet size={13} className="text-violet-400 shrink-0" />
+            <span className="text-xs font-mono text-muted-foreground">{shortAddr(author.walletId)}</span>
+            <div className="flex items-center gap-2 ml-1">
+              <button
+                onClick={copyWallet}
+                className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                title="Copy address"
+              >
+                {copied ? <Check size={12} style={{ color: "#a78bfa" }} /> : <Copy size={12} />}
+              </button>
+              <a
+                href={`https://explorer.shelby.xyz/account/${author.walletId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[11px] font-medium transition-colors hover:text-violet-400"
+                style={{ color: "rgba(167,139,250,0.7)" }}
+              >
+                View on Shelby Explorer
+                <ExternalLink size={10} />
+              </a>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Stats row */}

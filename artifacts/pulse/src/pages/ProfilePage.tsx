@@ -1,7 +1,7 @@
 import { Link } from "wouter";
-import { Heart, Clock, PenLine, Copy, Check, Sparkles } from "lucide-react";
+import { Heart, Clock, PenLine, Copy, Check, Sparkles, Wallet, ExternalLink, AtSign } from "lucide-react";
 import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, shortAddress } from "../hooks/useAuth";
 import { getPostsByWallet, loadDraft, type LocalPost } from "../lib/postStorage";
 
 function excerpt(text: string, max = 120): string {
@@ -52,8 +52,8 @@ function PostRow({ post, index }: { post: LocalPost; index: number }) {
 }
 
 export default function ProfilePage() {
-  const { user } = useAuth();
-  const [copied, setCopied] = useState(false);
+  const { user, openUsernamePrompt } = useAuth();
+  const [copiedWallet, setCopiedWallet] = useState(false);
 
   if (!user) return null;
 
@@ -65,8 +65,8 @@ export default function ProfilePage() {
 
   function copyWalletId() {
     navigator.clipboard.writeText(walletId).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setCopiedWallet(true);
+      setTimeout(() => setCopiedWallet(false), 2000);
     });
   }
 
@@ -108,16 +108,54 @@ export default function ProfilePage() {
           </Link>
         </div>
 
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{user.name}</h1>
-        <button onClick={copyWalletId}
-          className="mt-2 flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-foreground transition-colors group"
-          title="Copy wallet ID">
-          <span>{user.walletId}</span>
-          {copied
-            ? <Check size={11} style={{ color: "#a78bfa" }} />
-            : <Copy size={11} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-          }
-        </button>
+        {/* Name + username */}
+        <div className="mb-3">
+          {user.username ? (
+            <>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{user.username}</h1>
+              <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                <AtSign size={12} />
+                {user.username}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{user.name}</h1>
+              <button
+                onClick={openUsernamePrompt}
+                className="mt-1 text-xs text-violet-400/70 hover:text-violet-400 transition-colors flex items-center gap-1"
+              >
+                <AtSign size={11} /> Set a username
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Wallet identity row */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="inline-flex items-center gap-2 rounded-xl px-3.5 py-2"
+            style={{ background: "rgba(139,92,246,0.07)", border: "1px solid rgba(139,92,246,0.15)" }}>
+            <Wallet size={12} className="text-violet-400 shrink-0" />
+            <span className="text-xs font-mono text-muted-foreground">{shortAddress(walletId)}</span>
+            <button
+              onClick={copyWalletId}
+              className="text-muted-foreground/40 hover:text-muted-foreground transition-colors ml-0.5"
+              title="Copy full address"
+            >
+              {copiedWallet ? <Check size={11} style={{ color: "#a78bfa" }} /> : <Copy size={11} />}
+            </button>
+          </div>
+          <a
+            href={`https://explorer.shelby.xyz/account/${walletId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-violet-400 rounded-xl px-3.5 py-2"
+            style={{ color: "rgba(167,139,250,0.7)", background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.1)" }}
+          >
+            <ExternalLink size={11} />
+            View on Shelby Explorer
+          </a>
+        </div>
       </div>
 
       {/* Stats */}
@@ -126,7 +164,7 @@ export default function ProfilePage() {
           {[
             { label: "Stories published", value: posts.length.toString() },
             { label: "Total claps",       value: totalClaps > 0 ? totalClaps.toLocaleString() : "—" },
-            { label: "Wallet chain",      value: "local" },
+            { label: "Network",           value: "Aptos" },
           ].map(({ label, value }) => (
             <div key={label} className="rounded-xl px-4 py-3 text-center"
               style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
