@@ -8,20 +8,26 @@ export interface PulseUser {
 }
 
 const STORAGE_KEY = "pulse_user";
+const DISPLAY_NAME_KEY = "pulse_display_name";
 
-export function generateWalletId(): string {
-  const bytes = new Uint8Array(8);
-  crypto.getRandomValues(bytes);
-  const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return `0x${hex.slice(0, 4)}…${hex.slice(-4)}`;
+export function saveDisplayName(name: string): void {
+  shelbyStorage.set<string>(DISPLAY_NAME_KEY, name);
 }
 
-export function saveUser(name: string): PulseUser {
+export function loadDisplayName(): string | null {
+  return shelbyStorage.get<string>(DISPLAY_NAME_KEY);
+}
+
+function shortAddress(addr: string): string {
+  if (addr.length > 10) return `${addr.slice(0, 6)}…${addr.slice(-4)}`;
+  return addr;
+}
+
+export function saveUser(address: string, name?: string): PulseUser {
+  const displayName = (name && name.trim()) ? name.trim() : (loadDisplayName() || shortAddress(address));
   const user: PulseUser = {
-    name: name.trim(),
-    walletId: generateWalletId(),
+    name: displayName,
+    walletId: address,
     createdAt: new Date().toISOString(),
   };
   shelbyStorage.set<PulseUser>(STORAGE_KEY, user);
@@ -38,7 +44,7 @@ export function clearUser(): void {
 
 export interface AuthContextValue {
   user: PulseUser | null;
-  login: (name: string) => void;
+  login: (address: string, name?: string) => void;
   logout: () => void;
 }
 

@@ -75,6 +75,11 @@
     "zod": "catalog:"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1054.0"
+    "@aptos-labs/wallet-adapter-react": "^8.3.3",
+    "@aws-sdk/client-s3": "^3.1054.0",
+    "@telegram-apps/bridge": "^2.11.0",
+    "aptos": "^1.22.1",
+    "got": "^11.8.6",
+    "petra-plugin-wallet-adapter": "^0.4.5"
   }
 }

@@ -1,17 +1,38 @@
-import { useState, type ReactNode } from "react";
-import { AuthContext, loadUser, saveUser, clearUser, type PulseUser } from "../hooks/useAuth";
+import { useState, useEffect, type ReactNode } from "react";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import {
+  AuthContext,
+  saveUser,
+  clearUser,
+  loadDisplayName,
+  type PulseUser,
+} from "../hooks/useAuth";
 
 export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<PulseUser | null>(() => loadUser());
+  const { connected, account, disconnect } = useWallet();
+  const [user, setUser] = useState<PulseUser | null>(null);
 
-  function login(name: string) {
-    const newUser = saveUser(name);
+  useEffect(() => {
+    if (connected && account?.address) {
+      const address = account.address.toString();
+      const name = loadDisplayName() ?? undefined;
+      const newUser = saveUser(address, name);
+      setUser(newUser);
+    } else {
+      clearUser();
+      setUser(null);
+    }
+  }, [connected, account?.address]);
+
+  function login(address: string, name?: string) {
+    const newUser = saveUser(address, name);
     setUser(newUser);
   }
 
   function logout() {
     clearUser();
     setUser(null);
+    disconnect();
   }
 
   return (

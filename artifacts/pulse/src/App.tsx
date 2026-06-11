@@ -1,5 +1,7 @@
 import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { PetraWallet } from "petra-plugin-wallet-adapter";
 import AuthProvider from "@/components/AuthProvider";
 import LoginScreen from "@/components/LoginScreen";
 import Navbar from "@/components/Navbar";
@@ -12,6 +14,7 @@ import DiscoverPage from "@/pages/DiscoverPage";
 import { useAuth } from "@/hooks/useAuth";
 
 const queryClient = new QueryClient();
+const wallets = [new PetraWallet()];
 
 function MeshBackground() {
   return (
@@ -69,11 +72,13 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </WouterRouter>
+      <AptosWalletAdapterProvider plugins={wallets} autoConnect={false}>
+        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </WouterRouter>
+      </AptosWalletAdapterProvider>
     </QueryClientProvider>
   );
 }
